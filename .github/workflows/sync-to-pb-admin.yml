@@ -12,20 +12,20 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
 
-      - name: Clean and setup SSH key
+      - name: Set up SSH key
         run: |
-          # Clean repository data to avoid errors in the push process
-          git gc --prune=now
-          git remote add target git@github.com:Meet98787/testrepo.git || true
-          
-          # Setup SSH
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Push to pbdefi/pb-admin
+      - name: Re-clone repository and push
         run: |
-          git config --global user.email "mit@workinfinity.com"
-          git config --global user.name "MitLakhani9"
-          git push target HEAD:main --force
+          # Clone the target repository again to start fresh
+          git clone git@github.com:Meet98787/testrepo.git
+          cd testrepo
+          # Copy the contents of the source repository into the target repo
+          cp -r /path/to/your/source/* .
+          git add .
+          git commit -m "Sync updates"
+          git push origin main --force
