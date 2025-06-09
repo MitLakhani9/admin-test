@@ -12,9 +12,8 @@ jobs:
       # Checkout the source repository
       - name: Checkout source repo
         uses: actions/checkout@v4
-        name: Checkout source repository
         with:
-          repository: admin-test # Replace with actual source repo name
+          repository: admin-test  # Replace with actual source repo name
 
       # Set up SSH for secure communication with GitHub
       - name: Set up SSH key
