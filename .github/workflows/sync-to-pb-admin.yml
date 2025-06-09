@@ -16,5 +16,5 @@ jobs:
         run: |
           git config --global user.email "mit@workinfinity.com"
           git config --global user.name "MitLakhani9"
-          git remote add target https://x-access-token:${{ secrets.DEFI_REPO_TOKEN }}@github.com/Meet98787/testrepo.git
+          git remote add target https://x-access-token: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@github.com/Meet98787/testrepo.git
           git push target HEAD:main --force
