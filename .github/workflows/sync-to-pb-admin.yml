@@ -23,7 +23,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      # Clone the target repository
+      # Clone the target repository into a clean directory
       - name: Clone target repository
         run: |
           git clone git@github.com:Meet98787/testrepo.git target_repo
@@ -36,4 +36,3 @@ jobs:
           git add .
           git commit -m "Sync updates"
           git push origin main --force
-
