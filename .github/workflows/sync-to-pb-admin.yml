@@ -9,9 +9,14 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the source repository
       - name: Checkout source repo
         uses: actions/checkout@v4
+        name: Checkout source repository
+        with:
+          repository: <source-repository-name>  # Replace with actual source repo name
 
+      # Set up SSH for secure communication with GitHub
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -19,16 +24,17 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Re-clone target repo and push
+      # Clone the target repository
+      - name: Clone target repository
         run: |
-          # Clone the target repository to start fresh
-          git clone git@github.com:Meet98787/testrepo.git
-          cd testrepo
+          git clone git@github.com:Meet98787/testrepo.git target_repo
+          cd target_repo
           
-          # Copy all files from the checked-out source repository to the target repository
+          # Copy all files from the source repo to the target repo
           cp -r ../* .
-          
-          # Stage, commit, and push
+
+          # Stage, commit, and push changes
           git add .
           git commit -m "Sync updates"
           git push origin main --force
+
