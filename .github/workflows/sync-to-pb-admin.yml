@@ -16,7 +16,15 @@ jobs:
         run: |
           git config --global user.email "mit@workinfinity.com"
           git config --global user.name "MitLakhani9"
+          
+          # Add remote if it doesn't exist
+          git remote add target https://github.com/Meet98787/testrepo.git || true
+          
+          # Update the URL for the target remote
           git remote set-url target https://github.com/Meet98787/testrepo.git
+          
           git config --global credential.helper store
           echo "https://x-access-token:${{ secrets.DEFI_REPO_TOKEN }}" > ~/.git-credentials
+          
+          # Push to the target repository
           git push target HEAD:main --force
