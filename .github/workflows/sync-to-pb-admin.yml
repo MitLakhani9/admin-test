@@ -12,11 +12,6 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
 
-      - name: Clean up local repository
-        run: |
-          git gc --prune=now
-          git remote add target git@github.com:Meet98787/testrepo.git || true
-
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -24,6 +19,16 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Push to the target repository
+      - name: Re-clone target repo and push
         run: |
-          git push target HEAD:main --force
+          # Clone the target repository to start fresh
+          git clone git@github.com:Meet98787/testrepo.git
+          cd testrepo
+          
+          # Copy all files from the checked-out source repository to the target repository
+          cp -r ../* .
+          
+          # Stage, commit, and push
+          git add .
+          git commit -m "Sync updates"
+          git push origin main --force
