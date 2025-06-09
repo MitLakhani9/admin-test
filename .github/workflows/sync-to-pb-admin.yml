@@ -23,14 +23,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      # Clone the target repository into a clean directory
+      # Clone the target repository into a separate directory (target_repo)
       - name: Clone target repository
         run: |
           git clone git@github.com:Meet98787/testrepo.git target_repo
           cd target_repo
           
-          # Copy all files from the source repo to the target repo
-          cp -r ../* .
+          # Copy all files from the source repo's directory to the target repo
+          cp -r ../* .  # Only copy the contents of the source repo to the target repo, avoiding the target_repo itself
 
           # Stage, commit, and push changes
           git add .
