@@ -1,0 +1,20 @@
+name: Sync to pbdefi/pb-admin
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Mirror to pbdefi/pb-admin
+        run: |
+          git config --global user.email "mit@workinfinity.com"
+          git config --global user.name "MitLakhani9"
+          git remote add target https://x-access-token:${{ secrets.DEFI_REPO_TOKEN }}@github.com/Meet98787/testrepo.git
+          git push target HEAD:main --force
