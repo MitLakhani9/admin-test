@@ -10,20 +10,33 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-      - name: Push to Target
+      - name: Sync via GitHub API
         env:
-          TARGET_REPO: "Meet98787/testrepo"
-          PAT_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
+          SOURCE_REPO: MitLakhani9/admin-test
+          TARGET_REPO: Meet98787/testrepo
+          PAT_TOKEN: ${{ secrets.API_TOKEN }}
         run: |
-          # Use proper git URL format
-          git push \
-            "https://${{ github.actor }}:$PAT_TOKEN@github.com/$TARGET_REPO.git" \
-            HEAD:main --force-with-lease
+          # Get current commit SHA from source
+          COMMIT_SHA=$(git rev-parse HEAD)
+
+          # Create a new commit in target repo using API
+          curl -X POST \
+            -H "Authorization: token $PAT_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$TARGET_REPO/git/commits" \
+            -d '{
+              "message": "Sync from $SOURCE_REPO",
+              "tree": "$(curl -s -H "Authorization: token $PAT_TOKEN" "https://api.github.com/repos/$SOURCE_REPO/git/commits/$COMMIT_SHA" | jq -r '.tree.sha')",
+              "parents": ["$(curl -s -H "Authorization: token $PAT_TOKEN" "https://api.github.com/repos/$TARGET_REPO/git/refs/heads/main" | jq -r '.object.sha')"]
+            }'
+
+          # Update target's main branch
+          curl -X PATCH \
+            -H "Authorization: token $PAT_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$TARGET_REPO/git/refs/heads/main" \
+            -d '{
+              "sha": "$NEW_COMMIT_SHA",
+              "force": true
+            }'
