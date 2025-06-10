@@ -1,4 +1,4 @@
-name: Sync to pbdefi/pb-admin
+name: Sync to target repository
 
 on:
   push:
@@ -14,9 +14,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: MitLakhani9/admin-test
-          fetch-depth: 0  # Fetch all history instead of just the latest commit
+          fetch-depth: 0  # Get all history
 
-      # Set up SSH for secure communication with GitHub
+      # Set up SSH for both repositories
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -27,19 +27,26 @@ jobs:
           git config --global user.email "actions@github.com"
 
       # Add target repository as a remote
-      - name: Add target repository as remote
+      - name: Add target repository
         run: |
           git remote add target git@github.com:Meet98787/testrepo.git
-          git fetch target  # Fetch the target repo's state
+          git fetch target
 
-      # Create a new branch based on the target's main branch
-      - name: Create and push sync branch
+      # Reset target's main branch to match source's main branch
+      - name: Sync changes to target
         run: |
-          git checkout -b sync-branch target/main || git checkout -b sync-branch
-          git push --force target sync-branch
+          # Create a temporary branch with the source's content
+          git checkout -B temp-sync-branch origin/main
+          
+          # Force push to target's main branch
+          git push target temp-sync-branch:main --force
+          
+          # Clean up
+          git branch -D temp-sync-branch
 
-      # Create pull request (optional - requires GitHub CLI or API)
-      - name: Create Pull Request
+      # Optional: Create a sync-branch instead of updating main directly
+      - name: Create sync branch (alternative)
+        if: false  # Set to true if you prefer creating branches instead of updating main
         run: |
-          echo "PR would be created here"
-          # You could use GitHub CLI or API to create a PR
+          git checkout -B sync-branch origin/main
+          git push target sync-branch --force
