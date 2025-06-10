@@ -38,7 +38,10 @@ jobs:
         run: |
           git fetch target
 
-      # Push changes from the source repository to the target repository
-      - name: Push to target repository
+      # Create a new branch in the target repo and push
+      - name: Create new branch and push changes
         run: |
-          git push target main --force
+          git checkout -b sync-branch
+          git push target sync-branch
+
+      # You can manually merge the sync-branch into main on GitHub later
