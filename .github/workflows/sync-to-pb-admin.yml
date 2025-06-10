@@ -28,20 +28,15 @@ jobs:
         run: |
           git remote add target git@github.com:Meet98787/testrepo.git
 
-      # Clean up the local repository to avoid pushing corrupted objects
+      # Run git garbage collection to clean repository
       - name: Run git garbage collection
         run: |
           git gc --prune=now
 
-      # Fetch the latest changes from the target repository
-      - name: Fetch from target repository
-        run: |
-          git fetch target
-
-      # Create a new branch in the target repo and push
+      # Create a new branch and push
       - name: Create new branch and push changes
         run: |
           git checkout -b sync-branch
           git push target sync-branch
 
-      # You can manually merge the sync-branch into main on GitHub later
+      # Now manually create a pull request on GitHub to merge sync-branch into main
