@@ -28,11 +28,17 @@ jobs:
         run: |
           git remote add target git@github.com:Meet98787/testrepo.git
 
-      # Push source repo's changes to the target repository
+      # Clean up the local repository to avoid pushing corrupted objects
+      - name: Run git garbage collection
+        run: |
+          git gc --prune=now
+
+      # Fetch the latest changes from the target repository
+      - name: Fetch from target repository
+        run: |
+          git fetch target
+
+      # Push changes from the source repository to the target repository
       - name: Push to target repository
         run: |
-          # Fetch the latest changes from the target repository
-          git fetch target
-          
-          # Push changes from the source repository to the target repository
           git push target main --force
