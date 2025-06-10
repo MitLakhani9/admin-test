@@ -13,7 +13,8 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
         with:
-          repository: MitLakhani9/admin-test  # Replace with actual source repo name
+          repository: MitLakhani9/admin-test
+          fetch-depth: 0  # Fetch all history instead of just the latest commit
 
       # Set up SSH for secure communication with GitHub
       - name: Set up SSH key
@@ -22,21 +23,23 @@ jobs:
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
 
       # Add target repository as a remote
       - name: Add target repository as remote
         run: |
           git remote add target git@github.com:Meet98787/testrepo.git
+          git fetch target  # Fetch the target repo's state
 
-      # Run git garbage collection to clean repository
-      - name: Run git garbage collection
+      # Create a new branch based on the target's main branch
+      - name: Create and push sync branch
         run: |
-          git gc --prune=now
+          git checkout -b sync-branch target/main || git checkout -b sync-branch
+          git push --force target sync-branch
 
-      # Create a new branch and push
-      - name: Create new branch and push changes
+      # Create pull request (optional - requires GitHub CLI or API)
+      - name: Create Pull Request
         run: |
-          git checkout -b sync-branch
-          git push target sync-branch
-
-      # Now manually create a pull request on GitHub to merge sync-branch into main
+          echo "PR would be created here"
+          # You could use GitHub CLI or API to create a PR
