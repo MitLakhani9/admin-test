@@ -11,8 +11,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Get full history
-          persist-credentials: true  # Maintain auth
+          fetch-depth: 0
 
       - name: Configure Git
         run: |
@@ -22,13 +21,9 @@ jobs:
       - name: Push to Target
         env:
           TARGET_REPO: "Meet98787/testrepo"
-          PAT_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}  # Your PAT stored in secrets
+          PAT_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
         run: |
-          # Add target remote
-          git remote add target "https://oauth2:$PAT_TOKEN@github.com/$TARGET_REPO.git"
-          
-          # Verify remote
-          git remote -v
-          
-          # Force push (--force-with-lease is safer)
-          git push target HEAD:main --force-with-lease
+          # Use proper git URL format
+          git push \
+            "https://${{ github.actor }}:$PAT_TOKEN@github.com/$TARGET_REPO.git" \
+            HEAD:main --force-with-lease
