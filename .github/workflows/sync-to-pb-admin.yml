@@ -34,9 +34,6 @@ jobs:
           git gc --prune=now
 
       # Create a new branch and push
-      # - name: Create new branch and push changes
-      #   run: |
-      #     git checkout -b sync-branch
-      #     git push target sync-branch
+  
 
       # Now manually create a pull request on GitHub to merge sync-branch into main
