@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Important: Add this to get proper permissions
+
           persist-credentials: true
 
       - name: Configure Git
