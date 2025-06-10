@@ -23,16 +23,16 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      # Clone the target repository into a separate directory (target_repo)
-      - name: Clone target repository
+      # Add target repository as a remote
+      - name: Add target repository as remote
         run: |
-          git clone git@github.com:Meet98787/testrepo.git target_repo
-          cd target_repo
-          
-          # Copy all files from the source repo's directory to the target repo
-          cp -r ../* .  # Only copy the contents of the source repo to the target repo, avoiding the target_repo itself
+          git remote add target git@github.com:Meet98787/testrepo.git
 
-          # Stage, commit, and push changes
-          git add .
-          git commit -m "Sync updates"
-          git push origin main --force
+      # Push source repo's changes to the target repository
+      - name: Push to target repository
+        run: |
+          # Fetch the latest changes from the target repository
+          git fetch target
+          
+          # Push changes from the source repository to the target repository
+          git push target main --force
