@@ -1,4 +1,4 @@
-name: Secure Repository Sync
+name: Repository Synchronization
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1  # Shallow clone for efficiency
           persist-credentials: false
 
       - name: Configure Git
@@ -20,29 +20,42 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global init.defaultBranch main
 
-      - name: Create Clean Mirror
+      - name: Mirror with History
+        run: |
+          git clone --mirror https://github.com/MitLakhani9/admin-test.git
+          cd admin-test.git
+          git -c http.extraheader="Authorization: bearer $PAT_TOKEN" \
+          push --mirror https://github.com/$TARGET_REPO.git
+
+      - name: Prepare and Push Content
         env:
           TARGET_REPO: "Meet98787/testrepo"
           PAT_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
-          # Create temporary workspace
-          WORKSPACE=$(mktemp -d)
-          cd $WORKSPACE
+          # Create temporary directory
+          WORK_DIR=$(mktemp -d)
+          cd $WORK_DIR
           
-          # Clone source without history
-          git clone --depth 1 https://github.com/MitLakhani9/admin-test.git source
-          cd source
+          # Initialize new repository
+          git init .
           
-          # Create new orphan branch with clean history
-          git checkout --orphan temp-sync-branch
-          git rm -rf .
-          git add -A
-          git commit -m "Initial sync commit"
+          # Copy all files from source
+          cp -r $GITHUB_WORKSPACE/. .
           
-          # Push to target using header authentication
+          # Remove workflow file to avoid PAT exposure
+          rm -f .github/workflows/sync-to-pb-admin.yml
+          
+          # Create initial commit
+          git add .
+          git commit -m "Sync from source repository"
+          
+          # Add target remote
           git remote add target https://github.com/$TARGET_REPO.git
-          git -c http.extraheader="AUTHORIZATION: bearer $PAT_TOKEN" push target temp-sync-branch:main --force
+          
+          # Push using header authentication
+          git -c http.extraheader="Authorization: bearer $PAT_TOKEN" \
+              push target HEAD:main --force
           
           # Clean up
-          cd /tmp
-          rm -rf $WORKSPACE
+          cd ..
+          rm -rf $WORK_DIR
