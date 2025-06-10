@@ -1,36 +1,24 @@
-name: Sync to Target Repo
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          # Important: Add this to get proper permissions
-          persist-credentials: true
-
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-      - name: Push to Target (Authenticated)
-        env:
-          TARGET_REPO: "Meet98787/testrepo"
-          TARGET_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
-        run: |
-          # Verify token is working
-          echo "Testing authentication..."
-          curl -s -H "Authorization: token $TARGET_TOKEN" \
-            https://api.github.com/user | jq .login
-
-          # Push using the token
-          git push \
-            "https://$TARGET_TOKEN@github.com/$TARGET_REPO.git" \
-            HEAD:main --force
+- name: Push via API
+  env:
+    TARGET_REPO: "Meet98787/testrepo"
+    TARGET_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
+  run: |
+    # Get the current commit SHA of the file you want to update
+    SHA=$(curl -s -H "Authorization: token $TARGET_TOKEN" \
+      "https://api.github.com/repos/$TARGET_REPO/contents/.github/workflows/sync.yml" \
+      | jq -r '.sha')
+    
+    # Base64 encode the new file content
+    CONTENT=$(base64 -w0 .github/workflows/sync.yml)
+    
+    # Create the API request
+    curl -X PUT \
+      -H "Authorization: token $TARGET_TOKEN" \
+      -H "Accept: application/vnd.github.v3+json" \
+      "https://api.github.com/repos/$TARGET_REPO/contents/.github/workflows/sync.yml" \
+      -d '{
+        "message": "Sync update from GitHub Actions",
+        "content": "'"$CONTENT"'",
+        "sha": "'"$SHA"'",
+        "branch": "main"
+      }'
